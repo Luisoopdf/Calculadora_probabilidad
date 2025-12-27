@@ -1,20 +1,4 @@
-import math                          # Para usar ceil (redondear hacia arriba)
-from statistics import NormalDist    # Para calcular Z sin usar tabla
-
-
-# Funcion para calcular Z, apartir del nivel de confianza
-def calcular_z(confianza):
-    # Validamos que la confianza esté en un rango válido
-    if confianza <= 0 or confianza >= 1:
-        raise ValueError("La confianza debe estar entre 0 y 1 (ejemplo: 0.95).")
-
-    # alpha es la probabilidad de error
-    alpha = 1 - confianza
-
-    # Usamos la inversa de la normal estándar (intervalo bilateral)
-    z = NormalDist().inv_cdf(1 - alpha / 2)
-
-    return z
+from core import calcular_media, calcular_proporcion, calcular_z
 
 # Funcion para calcular la media
 def Media():
@@ -25,13 +9,6 @@ def Media():
         confianza = float(input("Ingresa el nivel de confianza (ej. 0.95): ").strip())
     except ValueError:
         print("Error: La confianza debe ser un número.")
-        return
-
-    # Calculamos Z con la funcion definida
-    try:
-        z = calcular_z(confianza)
-    except ValueError as error:
-        print(f"Error: {error}")
         return
 
     # Pedimos Sigma o S (piloto) y validamos su entrada
@@ -55,12 +32,13 @@ def Media():
     if margen_error <= 0:
         print("Error: El margen de error debe ser mayor que 0.")
         return
-
-    # Calculamos tamaño de muestra
-    n_sin_redondeo = ((z * sigma) / margen_error) ** 2
-
-    # Redondeamos siempre hacia arriba
-    n_final = math.ceil(n_sin_redondeo)
+    
+    #Calculamos la media desde core
+    try:
+        z, n_sin_redondeo, n_final = calcular_media(confianza, sigma, margen_error)
+    except ValueError as error:
+        print(f"Error: {error}")
+        return
 
     # MOSTRAR RESULTADOS
     print("\n--- RESULTADOS ---")
@@ -132,12 +110,12 @@ def Proporcion():
         print("Opción no válida.")
         return
 
-    # 5. Cálculo del tamaño de muestra
-    # Fórmula: n = (Z^2 * p * (1 - p)) / E^2
-    n_sin_redondeo = (z ** 2 * estimacion * (1 - estimacion)) / (margen_error ** 2)
-
-    # Redondeo hacia arriba
-    n_final = math.ceil(n_sin_redondeo)
+    # Calculamos Proporcion desde core
+    try:
+        z, n_sin_redondeo, n_final = calcular_proporcion(confianza, estimacion, margen_error)
+    except ValueError as error:
+        print(f"Error: {error}")
+        return
 
     # 6. Mostrar resultados
     print("\n--- RESULTADOS (PROPORCIÓN) ---")
@@ -181,7 +159,5 @@ def main():
             print("Opción no válida. Intenta nuevamente.")
 
 
-# =========================
-# PUNTO DE ENTRADA
-# =========================
+
 main()
