@@ -1,0 +1,56 @@
+[1mdiff --git a/main.py b/main.py[m
+[1mindex f6ba079..1dbe550 100644[m
+[1m--- a/main.py[m
+[1m+++ b/main.py[m
+[36m@@ -62,7 +62,7 @@[m [mdef Media():[m
+     # Redondeamos siempre hacia arriba[m
+     n_final = math.ceil(n_sin_redondeo)[m
+ [m
+[31m-    # ----- 6. MOSTRAR RESULTADOS -----[m
+[32m+[m[32m    # MOSTRAR RESULTADOS[m[41m[m
+     print("\n--- RESULTADOS ---")[m
+     print(f"Nivel de confianza: {confianza}")[m
+     print(f"Valor Z utilizado: {z:.5f}")[m
+[36m@@ -81,8 +81,40 @@[m [mdef Media():[m
+ [m
+ # Funcion Proporción[m
+ def Proporcion():[m
+[31m-    print("\nFunción de proporción aún no implementada.")[m
+[31m-    input("Presiona ENTER para volver al menú...")[m
+[32m+[m[32m    # Pedimos nivel de confianza validando la entrada (unicamente numeros)[m[41m[m
+[32m+[m[32m    try:[m[41m[m
+[32m+[m[32m        confianza = float(input("Ingresa el nivel de confianza (ej. 0.95): ").strip())[m[41m[m
+[32m+[m[32m    except ValueError:[m[41m[m
+[32m+[m[32m        print("Error: La confianza debe ser un número.")[m[41m[m
+[32m+[m[32m        return[m[41m[m
+[32m+[m[41m    [m
+[32m+[m[32m    # Pedimos margen de error y validamos su entrada[m[41m[m
+[32m+[m[32m    try:[m[41m[m
+[32m+[m[32m        margen_error = float(input("Ingresa el margen de error E (> 0): ").strip())[m[41m[m
+[32m+[m[32m    except ValueError:[m[41m[m
+[32m+[m[32m        print("Error: El margen de error debe ser un número.")[m[41m[m
+[32m+[m[32m        return[m[41m[m
+[32m+[m[41m    [m
+[32m+[m[32m    opcion = input("¿Deseas usar el caso conservador? \n1. Si\n2. No\nIngresa la opcion: ").strip()[m[41m[m
+[32m+[m[41m    [m
+[32m+[m[32m    if opcion == "1":[m[41m[m
+[32m+[m[32m        estimacion = 0.5[m[41m[m
+[32m+[m[32m    elif opcion == "2":[m[41m[m
+[32m+[m[32m        try:[m[41m[m
+[32m+[m[32m            estimacion = float(input("Ingresa la estimacion deseada (p): ").strip())[m[41m[m
+[32m+[m[32m        except ValueError:[m[41m[m
+[32m+[m[32m            print("Error: la estimacion debe ser un número.")[m[41m[m
+[32m+[m[32m            return[m[41m[m
+[32m+[m[41m        [m
+[32m+[m[32m        if estimacion <= 0 or estimacion >= 1:[m[41m[m
+[32m+[m[32m            print("Error: la estimacion p debe cumplir 0 < p < 1.")[m[41m[m
+[32m+[m[32m            return[m[41m[m
+[32m+[m[32m    else:[m[41m[m
+[32m+[m[32m        print("Opción no válida. Intenta nuevamente.")[m[41m[m
+[32m+[m[32m        return[m[41m[m
+[32m+[m[41m    [m
+[32m+[m[32m    n_sin_redondeo = (())[m[41m[m
+[32m+[m[41m    [m
+ [m
+ # MENÚ PRINCIPAL[m
+ def main():[m
