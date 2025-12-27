@@ -35,7 +35,7 @@ def Media():
     
     #Calculamos la media desde core
     try:
-        z, n_sin_redondeo, n_final = calcular_media(confianza, sigma, margen_error)
+        z, n_sin_redondeo, n_final, supuestos = calcular_media(confianza, sigma, margen_error)
     except ValueError as error:
         print(f"Error: {error}")
         return
@@ -45,15 +45,14 @@ def Media():
     print(f"Nivel de confianza: {confianza}")
     print(f"Valor Z utilizado: {z:.5f}")
     print("Fórmula utilizada: n = (Z * sigma / E)^2")
-    print(f"Tamaño de muestra (sin redondear): {n_sin_redondeo:.4f}")
-    print(f"Tamaño de muestra (redondeado): {n_final}")
+    print(f"Tamaño de muestra (sin redondear): {n_sin_redondeo}")
+    print(f"Tamaño de muestra (redondeado): {n_final:,}")
 
     # SUPUESTOS
-    print("\nSupuestos estadísticos:")
-    print("- El muestreo es aleatorio y representativo.")
-    print("- Las observaciones son independientes.")
-    print("- La desviación estándar es conocida o bien estimada.")
-    print("- La aproximación normal es válida o el tamaño de muestra es suficientemente grande.")
+    print("\nSupuestos estadísticos para este resultado:")
+    for i, supuesto in enumerate(supuestos, start=1):
+        print(f"{i}. {supuesto}")
+
 
     input("\nPresiona ENTER para volver al menú...")
 
@@ -96,9 +95,11 @@ def Proporcion():
 
     if opcion == "1":
         estimacion = 0.5
+        uso_conservador = True
     elif opcion == "2":
         try:
             estimacion = float(input("Ingresa la estimación deseada (p): ").strip())
+            uso_conservador = False
         except ValueError:
             print("Error: La estimación debe ser un número.")
             return
@@ -112,7 +113,8 @@ def Proporcion():
 
     # Calculamos Proporcion desde core
     try:
-        z, n_sin_redondeo, n_final = calcular_proporcion(confianza, estimacion, margen_error)
+        z, n_sin_redondeo, n_final, supuestos = calcular_proporcion(confianza, estimacion, margen_error, uso_conservador)
+
     except ValueError as error:
         print(f"Error: {error}")
         return
@@ -123,8 +125,8 @@ def Proporcion():
     print(f"Valor Z utilizado: {z:.5f}")
     print("Fórmula utilizada: n = (Z^2 * p * (1 - p)) / E^2")
     print(f"Estimación utilizada (p): {estimacion}")
-    print(f"n (sin redondear): {n_sin_redondeo:.4f}")
-    print(f"n (redondeado): {n_final}")
+    print(f"n (sin redondear): {n_sin_redondeo}")
+    print(f"n (redondeado): {n_final:,}")
 
     # 7. Supuestos
     print("\nSupuestos estadísticos:")
@@ -157,7 +159,5 @@ def main():
             salida = True
         else:
             print("Opción no válida. Intenta nuevamente.")
-
-
 
 main()
