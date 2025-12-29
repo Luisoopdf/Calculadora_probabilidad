@@ -1,6 +1,6 @@
 from core import calcular_media, calcular_proporcion
 
-
+# Función para calcular tamaño muestral de una media (entrada, cálculo y salida)
 def Media():
     """Calcula el tamaño de muestra para estimar una media poblacional."""
     print("\n--- CÁLCULO PARA MEDIA ---")
@@ -10,6 +10,7 @@ def Media():
         E = float(input("Margen de error E (>0): ").strip())
         z, n_crudo, n_final, supuestos = calcular_media(confianza, sigma, E)
     except Exception as e:
+        # Manejo de errores por entradas inválidas o cálculo
         print(f"Error: {e}")
         return
 
@@ -24,7 +25,7 @@ def Media():
 
     input("\nENTER para volver al menú...")
 
-
+# Función para calcular tamaño muestral de una proporción (entrada, cálculo y salida)
 def Proporcion():
     """Calcula el tamaño de muestra para estimar una proporción poblacional."""
     print("\n--- CÁLCULO PARA PROPORCIÓN ---")
@@ -45,6 +46,7 @@ def Proporcion():
 
         z, n_crudo, n_final, supuestos = calcular_proporcion(confianza, p, E, uso_conservador)
     except Exception as e:
+        # Manejo de errores por entradas inválidas o cálculo
         print(f"Error: {e}")
         return
 
@@ -60,7 +62,7 @@ def Proporcion():
 
     input("\nENTER para volver al menú...")
 
-
+# Menú principal: navegación entre opciones y salida
 def main():
     """Menú principal que gestiona la navegación entre opciones."""
     while True:
@@ -81,4 +83,5 @@ def main():
             print("Opción inválida.")
 
 if __name__ == "__main__":
+    # Punto de entrada del script
     main()

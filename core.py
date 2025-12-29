@@ -3,11 +3,13 @@ from statistics import NormalDist
 from decimal import Decimal, getcontext, ROUND_CEILING
 
 
+# Redondeo hacia arriba usando Decimal para evitar errores binarios
 def ceil_decimal(x: Decimal) -> int:
     """Redondea hacia arriba un número Decimal al entero más próximo."""
     return int(x.to_integral_value(rounding=ROUND_CEILING))
 
 
+# Obtiene Z crítico para un nivel de confianza bilateral
 def calcular_z(confianza: float) -> float:
     """Obtiene el valor Z crítico según el nivel de confianza."""
     if confianza <= 0 or confianza >= 1:
@@ -16,6 +18,7 @@ def calcular_z(confianza: float) -> float:
     alpha = 1 - confianza
     z = NormalDist().inv_cdf(1 - alpha / 2)
 
+    # Verificación de finitud de Z (confianzas extremas)
     if not math.isfinite(z):
         raise OverflowError(
             "La confianza es demasiado cercana a 1 y el valor Z se vuelve infinito."
@@ -24,11 +27,13 @@ def calcular_z(confianza: float) -> float:
     return z
 
 
+# Cálculo de tamaño muestral para media: n = (Z·σ/E)²
 def calcular_media(confianza: float, sigma: float, margen_error: float):
     """Calcula tamaño de muestra para media: n = (Z·σ/E)²
 
     Retorna: valor Z, n sin redondear, n redondeado, y lista de supuestos.
     """
+    # Validaciones de parámetros
     if sigma <= 0:
         raise ValueError("sigma debe ser mayor que 0.")
     if margen_error <= 0:
@@ -38,6 +43,7 @@ def calcular_media(confianza: float, sigma: float, margen_error: float):
 
     getcontext().prec = 80
 
+    # Conversión a Decimal para evitar errores de punto flotante
     Z = Decimal(str(z))
     SIGMA = Decimal(str(sigma))
     E = Decimal(str(margen_error))
@@ -67,6 +73,7 @@ def calcular_media(confianza: float, sigma: float, margen_error: float):
     return z, str(n_crudo), n_final, supuestos
 
 
+# Cálculo de tamaño muestral para proporción: n = (Z²·p(1-p))/E²
 def calcular_proporcion(
     confianza: float, p: float, margen_error: float, uso_conservador: bool = False
 ):
@@ -74,6 +81,7 @@ def calcular_proporcion(
 
     Retorna: valor Z, n sin redondear, n redondeado, y lista de supuestos.
     """
+    # Validaciones de parámetros
     if margen_error <= 0:
         raise ValueError("El margen de error E debe ser mayor que 0.")
     if p <= 0 or p >= 1:
@@ -83,6 +91,7 @@ def calcular_proporcion(
 
     getcontext().prec = 80
 
+    # Conversión a Decimal para evitar errores de punto flotante
     Z = Decimal(str(z))
     P = Decimal(str(p))
     E = Decimal(str(margen_error))

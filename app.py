@@ -1,3 +1,4 @@
+# Importaciones y utilidades principales de la app
 import streamlit as st
 import altair as alt
 import pandas as pd
@@ -77,6 +78,7 @@ st.set_page_config(
 
 CSS = """
 <style>
+/* Variables de tema y colores base */
 :root{
   --bg1:#0b1020; --bg2:#0f172a;
   --card: rgba(255,255,255,0.06);
@@ -86,6 +88,7 @@ CSS = """
   --shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
 
+/* Fondo con gradientes y texto principal */
 .stApp{
   background:
     radial-gradient(
@@ -112,15 +115,18 @@ CSS = """
   color: var(--text);
 }
 
+/* Contenedor: espaciado y ancho máximo */
 .block-container{
   padding-top: 3.2rem;
   padding-bottom: 2.2rem;
   max-width: 1150px;
 }
 
+/* Tipografía y texto auxiliar */
 h1,h2,h3,h4{ color: var(--text) !important; }
 .small-muted{ color: var(--muted); font-size: 0.92rem; }
 
+/* Insignias compactas de información (pill) */
 .pill{
   display:inline-flex; align-items:center; gap:8px;
   padding: 6px 10px;
@@ -132,6 +138,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   white-space: nowrap;
 }
 
+/* Tarjetas de métricas (n redondeado / crudo) */
 .metric{
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.10);
@@ -143,6 +150,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   justify-content: center;
 }
 
+/* Caja que contiene fórmula LaTeX */
 .formula-box{
   min-height: 160px;
   display: flex;
@@ -151,23 +159,24 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   align-items: stretch;
 }
 
+/* Etiqueta de fórmula y ajuste de LaTeX */
 .formula-label{
   text-align: left;
   margin-bottom: 8px;
 }
-
 .latex-wrap{
   width: 100%;
   text-align: center;
 }
-
 .formula-box .katex-display{
   margin: 0 !important;
 }
 
+/* Estilos de texto dentro de métricas */
 .metric .label{ color: var(--muted); font-size: 0.86rem; }
 .metric .value{ font-size: 1.55rem; font-weight: 700; letter-spacing: .2px; }
 
+/* Separador suave */
 .hr-soft{
   height: 1px;
   background: rgba(255,255,255,0.10);
@@ -175,22 +184,24 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   margin: 14px 0;
 }
 
+/* Inputs redondeados */
 [data-baseweb="input"] input,
 [data-baseweb="select"] div,
 [data-baseweb="textarea"] textarea{
   border-radius: 14px !important;
 }
 
+/* Pestañas y selección activa */
 .stTabs [data-baseweb="tab"]{ font-weight: 650; color: rgba(255,255,255,0.75); }
 .stTabs [aria-selected="true"]{ color: white !important; }
 
+/* Contenedores con borde para secciones */
 [data-testid="stVerticalBlockBorderWrapper"]{
   background: rgba(255,255,255,0.04) !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
   border-radius: 16px !important;
   box-shadow: none !important;
 }
-
 [data-testid="stVerticalBlockBorderWrapper"] > div{
   padding: 16px !important;
   min-height: 160px !important;
@@ -198,17 +209,18 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   flex-direction: column !important;
   justify-content: center !important;
 }
-
 [data-testid="stVerticalBlockBorderWrapper"] .katex-display{
   margin: 0 !important;
   text-align: center !important;
 }
 
+/* Oculta menú y pie nativos de Streamlit */
 #MainMenu{visibility:hidden;}
 footer{visibility:hidden;}
 header{visibility:hidden;}
 </style>
 """
+# Inyección del CSS en la app
 st.markdown(CSS, unsafe_allow_html=True)
 
 
@@ -219,7 +231,7 @@ def format_big(n_str: str, max_len: int = 28) -> str:
         return s
     return f"{s[:14]}…{s[-10:]}"
 
-
+# Construye la tarjeta de resultados (título, métricas, fórmula y supuestos)
 def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: str, supuestos: list[str]):
     """Construye y renderiza la tarjeta de resultados."""
     with st.container(border=True):
@@ -263,9 +275,9 @@ def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: s
 
 
 logo = Image.open("assets/tiburon.png")
-
 col_logo, col_title = st.columns([0.16, 0.84], vertical_alignment="center")
 
+# Muestra del logotipo
 with col_logo:
     st.markdown(
         """
@@ -281,6 +293,7 @@ with col_logo:
     st.image(logo, width=120)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# Título y descripción de la aplicación
 with col_title:
     st.markdown("## 🦈 Calculadora de Tamaño de Muestra")
     st.markdown(
@@ -293,6 +306,7 @@ with col_title:
         unsafe_allow_html=True,
     )
 
+# Separador visual
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
 
@@ -338,34 +352,36 @@ with tab_media:
                 help="En las mismas unidades que la variable.",
             )
 
+    # Espaciado entre parámetros y resultados
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
     if sigma > 0 and margen_error > 0:
         try:
+            # Cálculo principal y render de tarjeta
             z, n_crudo_str, n_final, supuestos = calcular_media(confianza, sigma, margen_error)
-            result_card("Resultado — Media",z,n_crudo_str,n_final,r"n = \left(\frac{Z \cdot \sigma}{E}\right)^2",supuestos,)
+            result_card("Resultado — Media", z, n_crudo_str, n_final, r"n = \left(\frac{Z \cdot \sigma}{E}\right)^2", supuestos)
 
+            # Gráficas de sensibilidad para media
             st.markdown("### 📉 Sensibilidad (Media)")
-
             col_left, col_right = st.columns(2)
 
             with col_left:
                 st.markdown("**n vs margen de error (E)**")
-
                 e_min = st.number_input("E mínimo", min_value=0.000001, value=0.5, step=0.000001, format="%.6f", key="e_min")
                 e_max = st.number_input("E máximo", min_value=0.000001, value=5.0, step=0.000001, format="%.6f", key="e_max")
 
                 if e_max <= e_min:
                     st.warning("E máximo debe ser mayor que E mínimo.")
                 else:
+                    # Generación de datos n para diferentes E
                     pasos = 80
                     lista_e = [e_min + (e_max - e_min) * i / (pasos - 1) for i in range(pasos)]
-
                     datos_e = []
                     for e in lista_e:
                         _, _, n_calc, _ = calcular_media(confianza, sigma, e)
                         datos_e.append({"E": e, "n": n_calc})
 
+                    # Gráfica n vs E y anotación del punto actual
                     df_e = pd.DataFrame(datos_e)
                     grafica_sensibilidad(
                         df=df_e,
@@ -389,7 +405,6 @@ with tab_media:
 
             with col_right:
                 st.markdown("**n vs nivel de confianza**")
-
                 conf_min = st.number_input(
                     "Confianza mínima", min_value=0.50, max_value=0.999999, value=0.80, step=0.01, format="%.6f", key="conf_min"
                 )
@@ -400,14 +415,15 @@ with tab_media:
                 if conf_max <= conf_min:
                     st.warning("Confianza máxima debe ser mayor que confianza mínima.")
                 else:
+                    # Generación de datos n para diferentes niveles de confianza
                     pasos = 80
                     lista_conf = [conf_min + (conf_max - conf_min) * i / (pasos - 1) for i in range(pasos)]
-
                     datos_c = []
                     for c in lista_conf:
                         _, _, n_calc, _ = calcular_media(c, sigma, margen_error)
                         datos_c.append({"Confianza": c, "n": n_calc})
 
+                    # Gráfica n vs confianza y anotación del punto actual
                     df_c = pd.DataFrame(datos_c)
                     grafica_sensibilidad(
                         df=df_c,
@@ -418,6 +434,8 @@ with tab_media:
                         titulo="n vs Confianza (Media) — Punto actual marcado",
                         etiqueta_x="Nivel de confianza"
                     )
+                    # Detalle del punto actual y parámetros fijos
+                    st.caption(f"Punto actual: confianza = {confianza}  →  n = {n_final}  |  E = {margen_error}  |  σ = {sigma}  |  Z = {z:.5f}")
 
                     st.caption(f"Punto actual: confianza = {confianza}  →  n = {n_final}  |  E = {margen_error}  |  σ = {sigma}  |  Z = {z:.5f}")
 
@@ -429,11 +447,11 @@ with tab_media:
                         "a niveles de confianza altos."
                     )
 
-
-
         except Exception as e:
+            # Mensaje de error ante entradas inválidas o fallos de cálculo
             st.error(f"No se pudo calcular: {e}")
     else:
+        # Ayuda inicial para entradas inválidas
         st.info("Ingresa valores válidos: σ > 0 y E > 0.")
 
 
@@ -485,12 +503,14 @@ with tab_prop:
                 help="Desactiva el conservador para editar p.",
             )
 
+    # Espaciado entre parámetros y resultados
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
     p_usada = 0.5 if conservador else float(p_val)
 
     if margen_error_p > 0 and 0 < p_usada < 1:
         try:
+            # Cálculo principal y render de tarjeta
             z, n_crudo_str, n_final, supuestos = calcular_proporcion(
                 confianza_p, p_usada, margen_error_p, uso_conservador=conservador
             )
@@ -673,13 +693,15 @@ with tab_prop:
 
 
         except Exception as e:
+            # Mensaje de error ante entradas inválidas o fallos de cálculo
             st.error(f"No se pudo calcular: {e}")
     else:
+        # Ayuda inicial para entradas inválidas
         st.info("Ingresa valores válidos: E > 0 y 0 < p < 1.")
 
 st.markdown(
     "<div class='small-muted' style='margin-top:18px;'>"
-    "Autores: Luis Enrique Cruz Estrella y Ángel Sánchez Rangel. "
+    "Luis Enrique Cruz Estrella | Ángel Sánchez Rangel "
     "© ESCOM IPN."
     "</div>",
     unsafe_allow_html=True,
