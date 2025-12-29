@@ -51,7 +51,6 @@ $$
 
 
 donde:
-donde:
 
 - Z es el valor crítico asociado al nivel de confianza  
 - σ es la desviación estándar poblacional o una estimación piloto  
@@ -147,10 +146,19 @@ Implementa una **aplicación de consola interactiva**, la cual:
 #### `app.py`
 Implementa una **aplicación web interactiva** utilizando el framework Streamlit:
 - Interfaz gráfica moderna y amigable
-- Dos pestañas principales: Media y Proporción
-- Actualización automática de los resultados
-- Visualización de fórmulas en formato LaTeX
+- Dos pestañas principales: **Media** y **Proporción**
+- Actualización automática de los resultados al modificar parámetros
+- Visualización de fórmulas en formato **LaTeX**
 - Validaciones en tiempo real de los parámetros ingresados
+- Módulo de análisis gráfico (sensibilidad) del tamaño de muestra:
+  - **Media:** gráficas **n vs E** y **n vs nivel de confianza**
+  - **Proporción:** gráficas **n vs E**, **n vs nivel de confianza** y **n vs p**
+- Las gráficas se generan evaluando las fórmulas de tamaño de muestra sobre un rango de valores del parámetro variable, manteniendo fijos los demás
+- Visualización interactiva con **Altair**, incluyendo:
+  - línea de tendencia
+  - **marcador del punto actual** (según los inputs del usuario)
+  - **línea vertical de referencia** en el valor actual del parámetro
+  - etiquetas/tooltip con parámetros usados (Z, σ, E, p, confianza)
 
 ---
 
@@ -164,8 +172,17 @@ Lenguaje de programación principal del proyecto.
 
 ---
 
-#### Streamlit
-Framework utilizado para desarrollar la interfaz web.
+### `streamlit` (framework de aplicaciones web)
+
+Esta librería se utiliza para construir la **interfaz gráfica interactiva** del proyecto, permitiendo desarrollar aplicaciones web directamente en Python.
+
+**Uso dentro del proyecto:**
+
+- Construcción de una interfaz gráfica moderna y amigable
+- Organización del contenido mediante pestañas (*Media* y *Proporción*)
+- Actualización automática de los resultados al modificar los parámetros
+- Validación interactiva de las entradas del usuario
+- Integración de resultados numéricos, fórmulas y gráficas en tiempo real
 
 **Instalación:**
 ```bash
@@ -179,27 +196,59 @@ streamlit run app.py
 
 ---
 
-#### statistics (librería estándar de Python)
-Se utiliza la clase `NormalDist` para calcular el **valor crítico Z** correspondiente al nivel de confianza seleccionado, a partir de la distribución normal estándar.
+### `statistics` (librería estándar de Python)
+
+Se utiliza la clase `NormalDist` para calcular el valor crítico **Z** correspondiente al nivel de confianza seleccionado, a partir de la distribución normal estándar.
 
 **Uso dentro del proyecto:**
-- Cálculo preciso del cuantil de la normal
+
+- Cálculo preciso del cuantil de la distribución normal
 - Eliminación del uso de tablas Z impresas
 - Soporte para cualquier nivel de confianza válido
 
 ---
 
-#### decimal (librería estándar de Python)
+### `decimal` (librería estándar de Python)
+
 Esta librería se utiliza para manejar cálculos con **alta precisión numérica**, especialmente importante cuando el tamaño de muestra resulta muy grande.
 
 **Uso dentro del proyecto:**
+
 - Evitar errores de redondeo por punto flotante
 - Representar números con gran cantidad de dígitos
 - Redondear siempre el tamaño de muestra hacia arriba usando `ROUND_CEILING`
 
 ---
 
-#### math (librería estándar de Python)
+### `pandas` (análisis y manipulación de datos)
+
+La librería **pandas** se emplea para estructurar y organizar los datos necesarios para el análisis gráfico del tamaño de muestra.
+
+**Uso dentro del proyecto:**
+
+- Creación de estructuras tipo `DataFrame`
+- Almacenamiento de valores calculados para las gráficas
+- Evaluación de las fórmulas de tamaño de muestra sobre rangos de valores
+- Soporte para análisis de sensibilidad al variar parámetros
+
+---
+
+### `altair` (visualización estadística)
+
+Altair se utiliza para la **visualización interactiva** de las gráficas de sensibilidad del tamaño de muestra, basada en la gramática de gráficos.
+
+**Uso dentro del proyecto:**
+
+- Generación de gráficas \( n \) vs margen de error \( E \)
+- Generación de gráficas \( n \) vs nivel de confianza
+- Generación de gráficas \( n \) vs proporción \( p \)
+- Representación visual del punto actual calculado
+- Inclusión de líneas verticales de referencia
+- Visualización clara y consistente en interfaces de fondo oscuro
+
+---
+
+#### `math` (librería estándar de Python)
 Se emplea para realizar validaciones matemáticas adicionales.
 
 **Uso dentro del proyecto:**
@@ -209,7 +258,7 @@ Se emplea para realizar validaciones matemáticas adicionales.
 
 ---
 
-#### Pillow (PIL)
+#### `Pillow` (PIL)
 Librería utilizada para la carga y visualización de imágenes dentro de la interfaz gráfica.
 
 **Uso dentro del proyecto:**
@@ -266,6 +315,93 @@ Las variables se utilizan directamente en las **fórmulas estadísticas clásica
 
 ---
 
+## e) Análisis gráfico y sensibilidad del tamaño de muestra
+
+Además del cálculo puntual del tamaño de muestra, el proyecto incorpora un **análisis gráfico de sensibilidad**, cuyo objetivo es **visualizar cómo cambia el tamaño de muestra \( n \)** cuando se modifican los parámetros principales del problema estadístico.
+
+Este análisis permite comprender mejor la relación entre:
+
+- Margen de error  
+- Nivel de confianza  
+- Proporción poblacional  
+
+y su impacto directo en el tamaño de la muestra requerida.
+
+Las gráficas se actualizan dinámicamente en la interfaz web y están basadas en las fórmulas estadísticas clásicas del intervalo de confianza.
+
+---
+
+### 1️. Gráfica \( n \) vs margen de error \( E \)
+
+Esta gráfica muestra la relación entre el tamaño de muestra \( n \) y el margen de error \( E \), manteniendo constantes el nivel de confianza y los demás parámetros.
+
+#### Fundamento matemático (media):
+
+$$
+n(E) = \left(\frac{Z \cdot \sigma}{E}\right)^2
+$$
+
+#### Fundamento matemático (proporción):
+
+$$
+n(E) = \frac{Z^2 \cdot p(1-p)}{E^2}
+$$
+
+#### Interpretación:
+
+- El tamaño de muestra disminuye rápidamente conforme aumenta el margen de error.
+- La relación es **no lineal e inversamente cuadrática**.
+- Márgenes de error pequeños implican tamaños de muestra muy grandes.
+- La gráfica ilustra el alto costo estadístico de exigir gran precisión.
+
+En la gráfica se indica:
+- El valor actual de \( E \).
+- El tamaño de muestra correspondiente.
+- Una línea vertical que marca el punto seleccionado.
+
+---
+
+### 2️. Gráfica \( n \) vs nivel de confianza
+
+Esta gráfica muestra cómo varía el tamaño de muestra cuando se modifica el nivel de confianza, manteniendo fijo el margen de error.
+
+#### Fundamento matemático:
+
+El valor crítico \( Z \) se obtiene como:
+
+$$
+Z = \Phi^{-1}\left(1 - \frac{1 - \text{confianza}}{2}\right)
+$$
+
+y se sustituye en la fórmula general del tamaño de muestra.
+
+#### Interpretación:
+
+- A mayor nivel de confianza, mayor es el valor crítico \( Z \).
+- Esto produce un incremento **no lineal** en el tamaño de muestra.
+- Confianzas cercanas a 1 implican tamaños de muestra muy grandes.
+- La gráfica permite visualizar el compromiso entre confiabilidad y costo muestral.
+
+---
+
+### 3️. Gráfica \( n \) vs proporción \( p \)
+
+Esta gráfica corresponde al caso de estimación de una proporción poblacional.
+
+#### Fundamento matemático:
+
+$$
+n(p) = \frac{Z^2 \cdot p(1-p)}{E^2}
+$$
+
+#### Interpretación:
+
+- El término \( p(1-p) \) alcanza su valor máximo cuando \( p = 0.5 \).
+- Por ello, el tamaño de muestra es máximo en \( p = 0.5 \).
+- La gráfica tiene forma parabólica y es simétrica respecto a \( p = 0.5 \).
+- Esto justifica el uso del **caso conservador** cuando no se conoce la proporción real.
+
+---
 ## Conclusión
 
 Este proyecto implementa de manera correcta y clara los **modelos estadísticos para el cálculo del tamaño de muestra**, combinando fundamentos teóricos de Probabilidad y Estadística con una implementación computacional robusta.
