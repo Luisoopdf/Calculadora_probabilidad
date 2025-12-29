@@ -1,10 +1,13 @@
+# Importaciones y utilidades principales de la app
 import streamlit as st
 import altair as alt
 import pandas as pd
 from PIL import Image
 from core import calcular_media, calcular_proporcion
 
+# Construye y muestra la gráfica de sensibilidad con línea, regla, punto y etiqueta
 def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_x):
+    # Línea base n vs x
     base = alt.Chart(df).mark_line(
         color="white",
         strokeWidth=2
@@ -21,6 +24,7 @@ def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_
         )
     )
 
+    # Regla vertical que marca el valor actual de x
     regla = alt.Chart(
         pd.DataFrame({x_col: [x_actual]})
     ).mark_rule(
@@ -31,6 +35,7 @@ def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_
         x=f"{x_col}:Q"
     )
 
+    # Punto que marca el valor actual (x_actual, y_actual) con tooltip
     punto = alt.Chart(
         pd.DataFrame({x_col: [x_actual], y_col: [y_actual]})
     ).mark_point(
@@ -42,6 +47,7 @@ def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_
         tooltip=[x_col, y_col]
     )
 
+    # Texto junto al punto para mostrar coordenadas actuales
     texto = alt.Chart(
         pd.DataFrame({x_col: [x_actual], y_col: [y_actual]})
     ).mark_text(
@@ -55,6 +61,7 @@ def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_
         text=alt.value(f"actual: {x_actual} → n={y_actual}")
     )
 
+    # Render de la gráfica interactiva con título
     st.altair_chart(
         (base + regla + punto + texto)
         .properties(
@@ -64,10 +71,10 @@ def grafica_sensibilidad(df, x_col, y_col, x_actual, y_actual, titulo, etiqueta_
             )
         )
         .interactive(),
-        use_container_width=True
+        width="stretch"
     )
 
-
+# Configuración de la página (título, icono, layout)
 st.set_page_config(
     page_title="Calculadora de Tamaño de Muestra",
     page_icon="🦈",
@@ -75,8 +82,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# CSS: estilos globales de la app y componentes
 CSS = """
 <style>
+/* Variables de tema y colores base */
 :root{
   --bg1:#0b1020; --bg2:#0f172a;
   --card: rgba(255,255,255,0.06);
@@ -86,6 +95,7 @@ CSS = """
   --shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
 
+/* Fondo con gradientes y texto principal */
 .stApp{
   background:
     radial-gradient(
@@ -112,15 +122,18 @@ CSS = """
   color: var(--text);
 }
 
+/* Contenedor: espaciado y ancho máximo */
 .block-container{
   padding-top: 3.2rem;
   padding-bottom: 2.2rem;
   max-width: 1150px;
 }
 
+/* Tipografía y texto auxiliar */
 h1,h2,h3,h4{ color: var(--text) !important; }
 .small-muted{ color: var(--muted); font-size: 0.92rem; }
 
+/* Insignias compactas de información (pill) */
 .pill{
   display:inline-flex; align-items:center; gap:8px;
   padding: 6px 10px;
@@ -132,6 +145,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   white-space: nowrap;
 }
 
+/* Tarjetas de métricas (n redondeado / crudo) */
 .metric{
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.10);
@@ -143,6 +157,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   justify-content: center;
 }
 
+/* Caja que contiene fórmula LaTeX */
 .formula-box{
   min-height: 160px;
   display: flex;
@@ -151,23 +166,24 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   align-items: stretch;
 }
 
+/* Etiqueta de fórmula y ajuste de LaTeX */
 .formula-label{
   text-align: left;
   margin-bottom: 8px;
 }
-
 .latex-wrap{
   width: 100%;
   text-align: center;
 }
-
 .formula-box .katex-display{
   margin: 0 !important;
 }
 
+/* Estilos de texto dentro de métricas */
 .metric .label{ color: var(--muted); font-size: 0.86rem; }
 .metric .value{ font-size: 1.55rem; font-weight: 700; letter-spacing: .2px; }
 
+/* Separador suave */
 .hr-soft{
   height: 1px;
   background: rgba(255,255,255,0.10);
@@ -175,22 +191,24 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   margin: 14px 0;
 }
 
+/* Inputs redondeados */
 [data-baseweb="input"] input,
 [data-baseweb="select"] div,
 [data-baseweb="textarea"] textarea{
   border-radius: 14px !important;
 }
 
+/* Pestañas y selección activa */
 .stTabs [data-baseweb="tab"]{ font-weight: 650; color: rgba(255,255,255,0.75); }
 .stTabs [aria-selected="true"]{ color: white !important; }
 
+/* Contenedores con borde para secciones */
 [data-testid="stVerticalBlockBorderWrapper"]{
   background: rgba(255,255,255,0.04) !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
   border-radius: 16px !important;
   box-shadow: none !important;
 }
-
 [data-testid="stVerticalBlockBorderWrapper"] > div{
   padding: 16px !important;
   min-height: 160px !important;
@@ -198,20 +216,21 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   flex-direction: column !important;
   justify-content: center !important;
 }
-
 [data-testid="stVerticalBlockBorderWrapper"] .katex-display{
   margin: 0 !important;
   text-align: center !important;
 }
 
+/* Oculta menú y pie nativos de Streamlit */
 #MainMenu{visibility:hidden;}
 footer{visibility:hidden;}
 header{visibility:hidden;}
 </style>
 """
+# Inyección del CSS en la app
 st.markdown(CSS, unsafe_allow_html=True)
 
-
+# Acorta números grandes para mostrarlos de forma legible
 def format_big(n_str: str, max_len: int = 28) -> str:
     """Formatea números muy grandes truncándolos de forma legible."""
     s = n_str.strip()
@@ -219,10 +238,11 @@ def format_big(n_str: str, max_len: int = 28) -> str:
         return s
     return f"{s[:14]}…{s[-10:]}"
 
-
+# Construye la tarjeta de resultados (título, métricas, fórmula y supuestos)
 def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: str, supuestos: list[str]):
     """Construye y renderiza la tarjeta de resultados."""
     with st.container(border=True):
+        # Encabezado con título y Z crítico
         st.markdown(
             f"""
             <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
@@ -240,6 +260,7 @@ def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: s
             unsafe_allow_html=True,
         )
 
+        # Métricas: n redondeado, n crudo y fórmula
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown(
@@ -256,16 +277,17 @@ def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: s
                 st.markdown('<div class="label">Fórmula</div>', unsafe_allow_html=True)
                 st.latex(formula)
 
+        # Lista de supuestos del cálculo
         st.markdown("<hr class='hr-soft'/>", unsafe_allow_html=True)
         st.markdown("**Supuestos**")
         for i, s in enumerate(supuestos, start=1):
             st.write(f"{i}. {s}")
 
-
+# Carga del logotipo y sección de encabezado
 logo = Image.open("assets/tiburon.png")
-
 col_logo, col_title = st.columns([0.16, 0.84], vertical_alignment="center")
 
+# Muestra del logotipo
 with col_logo:
     st.markdown(
         """
@@ -281,6 +303,7 @@ with col_logo:
     st.image(logo, width=120)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# Título y descripción de la aplicación
 with col_title:
     st.markdown("## 🦈 Calculadora de Tamaño de Muestra")
     st.markdown(
@@ -293,17 +316,19 @@ with col_title:
         unsafe_allow_html=True,
     )
 
+# Separador visual
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-
+# Pestañas: cálculo para media y proporción
 tab_media, tab_prop = st.tabs(["📈 Media", "🧩 Proporción"])
 
-
+# Sección de Media: entradas, cálculo y sensibilidad
 with tab_media:
     with st.container(border=True):
         st.markdown("### Parámetros")
         colA, colB, colC = st.columns(3)
 
+        # Entradas de parámetros para media
         with colA:
             confianza = st.number_input(
                 "Nivel de confianza (0–1)",
@@ -338,34 +363,38 @@ with tab_media:
                 help="En las mismas unidades que la variable.",
             )
 
+    # Espaciado entre parámetros y resultados
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
+    # Validación y cálculo para media
     if sigma > 0 and margen_error > 0:
         try:
+            # Cálculo principal y render de tarjeta
             z, n_crudo_str, n_final, supuestos = calcular_media(confianza, sigma, margen_error)
-            result_card("Resultado — Media",z,n_crudo_str,n_final,r"n = \left(\frac{Z \cdot \sigma}{E}\right)^2",supuestos,)
+            result_card("Resultado — Media", z, n_crudo_str, n_final, r"n = \left(\frac{Z \cdot \sigma}{E}\right)^2", supuestos)
 
+            # Gráficas de sensibilidad para media
             st.markdown("### 📉 Sensibilidad (Media)")
-
             col_left, col_right = st.columns(2)
 
+            # Sensibilidad de n respecto a E
             with col_left:
                 st.markdown("**n vs margen de error (E)**")
-
                 e_min = st.number_input("E mínimo", min_value=0.000001, value=0.5, step=0.000001, format="%.6f", key="e_min")
                 e_max = st.number_input("E máximo", min_value=0.000001, value=5.0, step=0.000001, format="%.6f", key="e_max")
 
                 if e_max <= e_min:
                     st.warning("E máximo debe ser mayor que E mínimo.")
                 else:
+                    # Generación de datos n para diferentes E
                     pasos = 80
                     lista_e = [e_min + (e_max - e_min) * i / (pasos - 1) for i in range(pasos)]
-
                     datos_e = []
                     for e in lista_e:
                         _, _, n_calc, _ = calcular_media(confianza, sigma, e)
                         datos_e.append({"E": e, "n": n_calc})
 
+                    # Gráfica n vs E y anotación del punto actual
                     df_e = pd.DataFrame(datos_e)
                     grafica_sensibilidad(
                         df=df_e,
@@ -376,9 +405,10 @@ with tab_media:
                         titulo="n vs E (Media) — Punto actual marcado",
                         etiqueta_x="Margen de error (E)"
                     )
-
+                    # Detalle del punto actual y parámetros fijos
                     st.caption(f"Punto actual: E = {margen_error}  →  n = {n_final}  |  σ = {sigma}  |  confianza = {confianza}  |  Z = {z:.5f}")
 
+                    # Explicación para usuarios
                     st.info(
                         "📌 **Interpretación:**\n\n"
                         "Esta gráfica muestra cómo el tamaño de muestra requerido depende del margen de error (E), "
@@ -387,9 +417,9 @@ with tab_media:
                         "una reducción en E provoca un incremento cuadrático en el tamaño de muestra."
                     )
 
+            # Sensibilidad de n respecto a la confianza
             with col_right:
                 st.markdown("**n vs nivel de confianza**")
-
                 conf_min = st.number_input(
                     "Confianza mínima", min_value=0.50, max_value=0.999999, value=0.80, step=0.01, format="%.6f", key="conf_min"
                 )
@@ -400,14 +430,15 @@ with tab_media:
                 if conf_max <= conf_min:
                     st.warning("Confianza máxima debe ser mayor que confianza mínima.")
                 else:
+                    # Generación de datos n para diferentes niveles de confianza
                     pasos = 80
                     lista_conf = [conf_min + (conf_max - conf_min) * i / (pasos - 1) for i in range(pasos)]
-
                     datos_c = []
                     for c in lista_conf:
                         _, _, n_calc, _ = calcular_media(c, sigma, margen_error)
                         datos_c.append({"Confianza": c, "n": n_calc})
 
+                    # Gráfica n vs confianza y anotación del punto actual
                     df_c = pd.DataFrame(datos_c)
                     grafica_sensibilidad(
                         df=df_c,
@@ -418,9 +449,10 @@ with tab_media:
                         titulo="n vs Confianza (Media) — Punto actual marcado",
                         etiqueta_x="Nivel de confianza"
                     )
-
+                    # Detalle del punto actual y parámetros fijos
                     st.caption(f"Punto actual: confianza = {confianza}  →  n = {n_final}  |  E = {margen_error}  |  σ = {sigma}  |  Z = {z:.5f}")
 
+                    # Explicación para usuarios
                     st.info(
                         "📌 **Interpretación:**\n\n"
                         "Esta gráfica muestra cómo el tamaño de muestra requerido aumenta al exigir un mayor nivel de confianza, "
@@ -429,19 +461,20 @@ with tab_media:
                         "a niveles de confianza altos."
                     )
 
-
-
         except Exception as e:
+            # Mensaje de error ante entradas inválidas o fallos de cálculo
             st.error(f"No se pudo calcular: {e}")
     else:
+        # Ayuda inicial para entradas inválidas
         st.info("Ingresa valores válidos: σ > 0 y E > 0.")
 
-
+# Sección de Proporción: entradas, cálculo y sensibilidad
 with tab_prop:
     with st.container(border=True):
         st.markdown("### Parámetros")
         colA, colB, colC, colD = st.columns([1.1, 1, 1, 1])
 
+        # Entradas de parámetros para proporción
         with colA:
             confianza_p = st.number_input(
                 "Nivel de confianza (0–1)",
@@ -485,17 +518,22 @@ with tab_prop:
                 help="Desactiva el conservador para editar p.",
             )
 
+    # Espaciado entre parámetros y resultados
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
+    # Selección de p efectiva (conservador vs ingresada)
     p_usada = 0.5 if conservador else float(p_val)
 
+    # Validación y cálculo para proporción
     if margen_error_p > 0 and 0 < p_usada < 1:
         try:
+            # Cálculo principal y render de tarjeta
             z, n_crudo_str, n_final, supuestos = calcular_proporcion(
                 confianza_p, p_usada, margen_error_p, uso_conservador=conservador
             )
-            result_card("Resultado — Proporción", z, n_crudo_str, n_final, r"n = \frac{Z^2 \cdot p(1-p)}{E^2}", supuestos,)
+            result_card("Resultado — Proporción", z, n_crudo_str, n_final, r"n = \frac{Z^2 \cdot p(1-p)}{E^2}", supuestos)
 
+            # Gráficas de sensibilidad para proporción
             st.markdown("### 📉 Sensibilidad (Proporción)")
             st.markdown(
                 "<div class='small-muted'>"
@@ -506,9 +544,10 @@ with tab_prop:
             )
 
             col_left, col_right = st.columns(2)
+
+            # Sensibilidad de n respecto a E
             with col_left:
                 st.markdown("**1) n vs margen de error (E)**")
-
                 e_min_g = st.number_input(
                     "E mínimo (gráfica)",
                     min_value=0.000001,
@@ -531,9 +570,9 @@ with tab_prop:
                 if e_max_g <= e_min_g:
                     st.warning("E máximo debe ser mayor que E mínimo.")
                 else:
+                    # Generación de datos n para diferentes E
                     pasos = 60
                     lista_e = [e_min_g + (e_max_g - e_min_g) * i / (pasos - 1) for i in range(pasos)]
-
                     datos = []
                     for e in lista_e:
                         _z, _n_crudo, _n_final, _ = calcular_proporcion(
@@ -541,6 +580,7 @@ with tab_prop:
                         )
                         datos.append({"E": e, "n": _n_final})
 
+                    # Gráfica n vs E y anotación del punto actual
                     df = pd.DataFrame(datos)
                     grafica_sensibilidad(
                         df=df,
@@ -551,9 +591,10 @@ with tab_prop:
                         titulo="n vs E (Proporción) — Punto actual marcado",
                         etiqueta_x="Margen de error (E)"
                     )
-
+                    # Detalle del punto actual y parámetros fijos
                     st.caption(f"Punto actual: E = {margen_error_p}  →  n = {n_final}  |  p = {p_usada}  |  confianza = {confianza_p}  |  Z = {z:.5f}")
 
+                    # Explicación para usuarios
                     st.info(
                         "📌 **Interpretación:**\n\n"
                         "Aquí solo cambia **E**. Si reduces el margen de error, el intervalo de confianza se hace más estrecho "
@@ -561,9 +602,9 @@ with tab_prop:
                         "(relación tipo 1/E²)."
                     )
 
+            # Sensibilidad de n respecto a la confianza
             with col_right:
                 st.markdown("**2) n vs nivel de confianza**")
-
                 conf_min_g = st.number_input(
                     "Confianza mínima (gráfica)",
                     min_value=0.50,
@@ -586,9 +627,9 @@ with tab_prop:
                 if conf_max_g <= conf_min_g:
                     st.warning("Confianza máxima debe ser mayor que confianza mínima.")
                 else:
+                    # Generación de datos n para diferentes niveles de confianza
                     pasos = 60
                     lista_c = [conf_min_g + (conf_max_g - conf_min_g) * i / (pasos - 1) for i in range(pasos)]
-
                     datos = []
                     for c in lista_c:
                         _z, _n_crudo, _n_final, _ = calcular_proporcion(
@@ -596,6 +637,7 @@ with tab_prop:
                         )
                         datos.append({"Confianza": c, "n": _n_final})
 
+                    # Gráfica n vs confianza y anotación del punto actual
                     df = pd.DataFrame(datos)
                     grafica_sensibilidad(
                         df=df,
@@ -606,10 +648,10 @@ with tab_prop:
                         titulo="n vs Confianza (Proporción) — Punto actual marcado",
                         etiqueta_x="Nivel de confianza"
                     )
-
+                    # Detalle del punto actual y parámetros fijos
                     st.caption(f"Punto actual: confianza = {confianza_p}  →  n = {n_final}  |  E = {margen_error_p}  |  p = {p_usada}  |  Z = {z:.5f}")
 
-
+                    # Explicación para usuarios
                     st.info(
                         "📌 **Interpretación:**\n\n"
                         "Aquí solo cambia la **confianza**. Al subir la confianza, aumenta el valor crítico **Z**, "
@@ -617,10 +659,11 @@ with tab_prop:
                         "se requiere una muestra mayor, por eso **n aumenta**."
                     )
 
+            # Separador antes de la tercera gráfica
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
+            # Sensibilidad de n respecto a p
             st.markdown("**3) n vs proporción p**")
-
             colp1, colp2 = st.columns([1, 1])
             with colp1:
                 p_min_g = st.number_input(
@@ -646,9 +689,9 @@ with tab_prop:
             if p_max_g <= p_min_g:
                 st.warning("p máximo debe ser mayor que p mínimo.")
             else:
+                # Generación de datos n para diferentes proporciones p
                 pasos = 80
                 lista_p = [p_min_g + (p_max_g - p_min_g) * i / (pasos - 1) for i in range(pasos)]
-
                 datos = []
                 for p_tmp in lista_p:
                     _z, _n_crudo, _n_final, _ = calcular_proporcion(
@@ -656,30 +699,44 @@ with tab_prop:
                     )
                     datos.append({"p": p_tmp, "n": _n_final})
 
+                # Gráfica n vs p y anotación del punto actual
                 df = pd.DataFrame(datos)
-                st.line_chart(df, x="p", y="n")
-
-                st.caption(
-                    f"Parámetros fijos: E = {margen_error_p:.6f} · confianza = {confianza_p:.4f} · "
-                    f"Z = {z:.5f} · p actual usado en resultado = {p_usada:.4f}"
+                grafica_sensibilidad(
+                    df=df,
+                    x_col="p",
+                    y_col="n",
+                    x_actual=p_usada,
+                    y_actual=n_final,
+                    titulo="n vs p (Proporción) — Punto actual marcado",
+                    etiqueta_x="Proporción p"
                 )
 
+                # Detalle del punto actual y parámetros fijos
+                st.caption(
+                    f"Punto actual: p = {p_usada:.4f} → n = {n_final}  |  "
+                    f"E = {margen_error_p:.6f}  |  confianza = {confianza_p:.4f}  |  Z = {z:.5f}"
+                )
+
+                # Explicación para usuarios
                 st.info(
                     "📌 **Interpretación:**\n\n"
-                    "Esta gráfica muestra cómo afecta **p** a n. El término **p(1−p)** es máximo en **p = 0.5**, "
-                    "por eso ahí se obtiene el **n más grande**. "
-                    "Esto justifica el **caso conservador** (usar p=0.5 cuando no se conoce p)."
+                    "Esta gráfica muestra cómo cambia el tamaño de muestra cuando varía la proporción **p**, "
+                    "manteniendo fijo el margen de error **E** y el nivel de confianza.\n\n"
+                    "El término **p(1−p)** alcanza su máximo en **p = 0.5**, por eso ahí se obtiene el **n más grande**. "
+                    "Esto justifica el **caso conservador** cuando no se conoce p."
                 )
 
-
         except Exception as e:
+            # Mensaje de error ante entradas inválidas o fallos de cálculo
             st.error(f"No se pudo calcular: {e}")
     else:
+        # Ayuda inicial para entradas inválidas
         st.info("Ingresa valores válidos: E > 0 y 0 < p < 1.")
 
+# Pie con autores y créditos
 st.markdown(
     "<div class='small-muted' style='margin-top:18px;'>"
-    "Autores: Luis Enrique Cruz Estrella y Ángel Sánchez Rangel. "
+    "Luis Enrique Cruz Estrella | Ángel Sánchez Rangel "
     "© ESCOM IPN."
     "</div>",
     unsafe_allow_html=True,
