@@ -4,21 +4,21 @@ from decimal import Decimal, getcontext, ROUND_CEILING
 
 
 def ceil_decimal(x: Decimal) -> int:
-    """Redondea hacia arriba un Decimal y lo devuelve como int (puede ser gigantesco)."""
+    """Redondea hacia arriba un número Decimal al entero más próximo."""
     return int(x.to_integral_value(rounding=ROUND_CEILING))
 
 
 def calcular_z(confianza: float) -> float:
     """
-    Calcula Z crítico para un intervalo bilateral a partir del nivel de confianza.
+    Obtiene el valor Z crítico según el nivel de confianza.
     """
     if confianza <= 0 or confianza >= 1:
         raise ValueError("La confianza debe estar entre 0 y 1 (ej: 0.95).")
 
+    # Calcula Z usando la distribución normal inversa
     alpha = 1 - confianza
     z = NormalDist().inv_cdf(1 - alpha / 2)
 
-    # Si la confianza es absurdamente cercana a 1, z podría volverse infinito
     if not math.isfinite(z):
         raise OverflowError(
             "La confianza es demasiado cercana a 1 y el valor Z se vuelve infinito."
@@ -29,27 +29,31 @@ def calcular_z(confianza: float) -> float:
 
 def calcular_media(confianza: float, sigma: float, margen_error: float):
     """
-    n = (Z * sigma / E)^2
-    Retorna: z (float), n_crudo_str (str), n_final (int), supuestos (list[str])
+    Calcula tamaño de muestra para media: n = (Z·σ/E)²
+
+    Retorna: valor Z, n sin redondear, n redondeado, y lista de supuestos.
     """
     if sigma <= 0:
         raise ValueError("sigma debe ser mayor que 0.")
     if margen_error <= 0:
         raise ValueError("El margen de error E debe ser mayor que 0.")
 
+    # Obtiene Z crítico
     z = calcular_z(confianza)
 
-    # Precisión alta para soportar números grandes
+    # Usa precisión decimal alta para cálculos exactos
     getcontext().prec = 80
 
     Z = Decimal(str(z))
     SIGMA = Decimal(str(sigma))
     E = Decimal(str(margen_error))
 
+    # Aplica la fórmula
     ratio = (Z * SIGMA) / E
     n_crudo = ratio * ratio
     n_final = ceil_decimal(n_crudo)
 
+    # Define supuestos estadísticos
     supuestos = [
         "Se asume muestreo aleatorio y representativo de la población.",
         "Se asume independencia entre observaciones.",
@@ -57,6 +61,7 @@ def calcular_media(confianza: float, sigma: float, margen_error: float):
         "El margen de error E se interpreta en las mismas unidades que la variable medida.",
     ]
 
+    # Ajusta supuesto según tamaño de muestra
     if n_final >= 30:
         supuestos.insert(
             2,
@@ -71,36 +76,43 @@ def calcular_media(confianza: float, sigma: float, margen_error: float):
     return z, str(n_crudo), n_final, supuestos
 
 
-def calcular_proporcion(confianza: float, p: float, margen_error: float, uso_conservador: bool = False):
+def calcular_proporcion(
+    confianza: float, p: float, margen_error: float, uso_conservador: bool = False
+):
     """
-    n = (Z^2 * p(1-p)) / E^2
-    Retorna: z (float), n_crudo_str (str), n_final (int), supuestos (list[str])
+    Calcula tamaño de muestra para proporción: n = (Z²·p(1-p))/E²
+
+    Retorna: valor Z, n sin redondear, n redondeado, y lista de supuestos.
     """
     if margen_error <= 0:
         raise ValueError("El margen de error E debe ser mayor que 0.")
     if p <= 0 or p >= 1:
         raise ValueError("p debe cumplir 0 < p < 1.")
 
+    # Obtiene Z crítico
     z = calcular_z(confianza)
 
+    # Usa precisión decimal alta para cálculos exactos
     getcontext().prec = 80
 
     Z = Decimal(str(z))
     P = Decimal(str(p))
     E = Decimal(str(margen_error))
 
+    # Aplica la fórmula
     numerador = (Z * Z) * P * (Decimal("1") - P)
     denominador = E * E
     n_crudo = numerador / denominador
     n_final = ceil_decimal(n_crudo)
 
+    # Define supuestos estadísticos
     supuestos = [
         "Se asume muestreo aleatorio y representativo de la población.",
         "Se asume independencia entre observaciones.",
         "El margen de error E se interpreta como proporción (por ejemplo, 0.05 = 5%).",
     ]
 
-    # Condición normal para proporciones (con el n final)
+    # Valida el criterio np ≥ 5 y n(1-p) ≥ 5
     np_val = n_final * p
     n1p_val = n_final * (1 - p)
 
@@ -115,9 +127,14 @@ def calcular_proporcion(confianza: float, p: float, margen_error: float, uso_con
             f"No se cumple completamente np = {np_val:.2f} ≥ 5 y/o n(1-p) = {n1p_val:.2f} ≥ 5; la aproximación normal podría no ser adecuada.",
         )
 
+    # Nota si se usó caso conservador
     if uso_conservador and abs(p - 0.5) < 1e-12:
-        supuestos.append("Se utilizó p = 0.5 como caso conservador (maximiza p(1-p) y produce el mayor n).")
+        supuestos.append(
+            "Se utilizó p = 0.5 como caso conservador (maximiza p(1-p) y produce el mayor n)."
+        )
     else:
-        supuestos.append("La proporción p utilizada proviene de una estimación previa o datos piloto.")
+        supuestos.append(
+            "La proporción p utilizada proviene de una estimación previa o datos piloto."
+        )
 
     return z, str(n_crudo), n_final, supuestos

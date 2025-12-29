@@ -1,17 +1,23 @@
+# Importar funciones de cálculo desde el módulo core
 from core import calcular_media, calcular_proporcion
 
 
 def Media():
+    """Calcula el tamaño de muestra para estimar una media poblacional."""
     print("\n--- CÁLCULO PARA MEDIA ---")
     try:
+        # Solicita parámetros: nivel de confianza, desviación estándar y margen de error
         confianza = float(input("Confianza (ej 0.95): ").strip())
         sigma = float(input("Desviación estándar (σ o S piloto) (>0): ").strip())
         E = float(input("Margen de error E (>0): ").strip())
+        
+        # Calcula usando la fórmula: n = (Z·σ/E)^2
         z, n_crudo, n_final, supuestos = calcular_media(confianza, sigma, E)
     except Exception as e:
         print(f"Error: {e}")
         return
 
+    # Muestra resultados y supuestos estadísticos
     print("\n--- RESULTADOS (MEDIA) ---")
     print(f"Z: {z:.5f}")
     print("Fórmula: n = (Z·σ/E)^2")
@@ -25,11 +31,15 @@ def Media():
 
 
 def Proporcion():
+    """Calcula el tamaño de muestra para estimar una proporción poblacional."""
     print("\n--- CÁLCULO PARA PROPORCIÓN ---")
     try:
+        # Solicita parámetros: confianza, error y si usar p=0.5 o un valor específico
         confianza = float(input("Confianza (ej 0.95): ").strip())
         E = float(input("Margen de error E (>0) (ej 0.05): ").strip())
         op = input("¿Caso conservador p=0.5? (1=Sí, 2=No): ").strip()
+        
+        # Define p según la opción elegida
         if op == "1":
             p = 0.5
             uso_conservador = True
@@ -40,11 +50,13 @@ def Proporcion():
             print("Opción inválida.")
             return
 
+        # Calcula usando la fórmula: n = (Z²·p(1−p))/E²
         z, n_crudo, n_final, supuestos = calcular_proporcion(confianza, p, E, uso_conservador)
     except Exception as e:
         print(f"Error: {e}")
         return
 
+    # Muestra resultados y supuestos estadísticos
     print("\n--- RESULTADOS (PROPORCIÓN) ---")
     print(f"Z: {z:.5f}")
     print("Fórmula: n = (Z²·p(1−p))/E²")
@@ -59,13 +71,16 @@ def Proporcion():
 
 
 def main():
+    """Menú principal que gestiona la navegación entre opciones."""
     while True:
+        # Muestra opciones disponibles
         print("\n------ CALCULADORA DE TAMAÑO MUESTRAL ------")
         print("1) Media")
         print("2) Proporción")
         print("0) Salir")
         opcion = input("Opción: ").strip()
 
+        # Ejecuta la función según la opción seleccionada
         if opcion == "1":
             Media()
         elif opcion == "2":
@@ -75,7 +90,6 @@ def main():
             break
         else:
             print("Opción inválida.")
-
 
 if __name__ == "__main__":
     main()

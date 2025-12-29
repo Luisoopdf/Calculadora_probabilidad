@@ -3,9 +3,11 @@ from PIL import Image
 from core import calcular_media, calcular_proporcion
 
 
-# -----------------------------
-# Configuración de página
-# -----------------------------
+# CONFIGURACIÓN INICIAL DE LA PÁGINA
+# Define las propiedades generales de la aplicación Streamlit:
+# - Título y icono que aparecen en la pestaña del navegador
+# - Layout "wide" para aprovechar más ancho de pantalla
+# - Sidebar colapsado por defecto para más espacio central
 st.set_page_config(
     page_title="Calculadora de Tamaño de Muestra",
     page_icon="🦈",
@@ -13,9 +15,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# -----------------------------
-# CSS moderno (glass + gradientes)
-# -----------------------------
+
+# ESTILOS CSS PERSONALIZADOS
+# Define un tema oscuro y moderno con variables CSS reutilizables.
+# Incluye:
+# - Paleta de colores: fondos oscuros, bordes sutiles, texto claro
+# - Gradientes de fondo con efecto visual moderno
+# - Componentes estilizados: tarjetas (cards), pills, métricas
+# - Oculta elementos por defecto de Streamlit (menú, footer, header)
 CSS = """
 <style>
 :root{
@@ -31,17 +38,17 @@ CSS = """
   background:
     radial-gradient(
       1200px 700px at 15% 10%,
-      rgba(30, 64, 175, 0.35),   /* azul medio */
+      rgba(30, 64, 175, 0.35),
       transparent 55%
     ),
     radial-gradient(
       1000px 650px at 85% 20%,
-      rgba(15, 23, 42, 0.45),   /* azul muy oscuro */
+      rgba(15, 23, 42, 0.45),
       transparent 60%
     ),
     linear-gradient(
       180deg,
-      #020617 0%,   /* casi negro azulado */
+      #020617 0%,
       #020617 15%,
       #020617 30%,
       #020617 45%,
@@ -53,9 +60,8 @@ CSS = """
   color: var(--text);
 }
 
-
 .block-container{
-  padding-top: 3.2rem;   /* MÁS ESPACIO ARRIBA */
+  padding-top: 3.2rem;
   padding-bottom: 2.2rem;
   max-width: 1150px;
 }
@@ -79,7 +85,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 16px;
   padding: 16px;
-  min-height: 160px;        /* 🔑 MISMA ALTURA */
+  min-height: 160px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -90,7 +96,7 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch; /* <-- importante: que la caja ocupe todo el ancho */
+  align-items: stretch;
 }
 
 .formula-label{
@@ -98,13 +104,11 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   margin-bottom: 8px;
 }
 
-/* Contenedor que centra la fórmula */
 .latex-wrap{
   width: 100%;
   text-align: center;
 }
 
-/* Quitar márgenes raros del render */
 .formula-box .katex-display{
   margin: 0 !important;
 }
@@ -119,25 +123,15 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   margin: 14px 0;
 }
 
-/* Inputs redondeados */
 [data-baseweb="input"] input,
 [data-baseweb="select"] div,
 [data-baseweb="textarea"] textarea{
   border-radius: 14px !important;
 }
 
-
-/* Tabs */
 .stTabs [data-baseweb="tab"]{ font-weight: 650; color: rgba(255,255,255,0.75); }
 .stTabs [aria-selected="true"]{ color: white !important; }
 
-/* =========================================================
-   ARREGLO CLAVE:
-   Estilo premium para contenedores con border=True
-   (Esto sí envuelve widgets reales en Streamlit)
-   ========================================================= */
-/* Contenedores border=True COMPLETAMENTE limpios */
-/* Contenedores border=True como tarjetas (para fórmula y si lo usas en parámetros/resultados) */
 [data-testid="stVerticalBlockBorderWrapper"]{
   background: rgba(255,255,255,0.04) !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
@@ -145,24 +139,19 @@ h1,h2,h3,h4{ color: var(--text) !important; }
   box-shadow: none !important;
 }
 
-/* padding interno + altura consistente */
 [data-testid="stVerticalBlockBorderWrapper"] > div{
   padding: 16px !important;
-  min-height: 160px !important;   /* ✅ mismo alto que .metric */
+  min-height: 160px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
 }
 
-/* Centrar LaTeX dentro de la tarjeta */
 [data-testid="stVerticalBlockBorderWrapper"] .katex-display{
   margin: 0 !important;
   text-align: center !important;
 }
 
-
-
-/* Ocultar menú Streamlit */
 #MainMenu{visibility:hidden;}
 footer{visibility:hidden;}
 header{visibility:hidden;}
@@ -171,10 +160,14 @@ header{visibility:hidden;}
 st.markdown(CSS, unsafe_allow_html=True)
 
 
-# -----------------------------
-# Helpers UI
-# -----------------------------
+# FUNCIONES AUXILIARES DE UTILIDAD
+
 def format_big(n_str: str, max_len: int = 28) -> str:
+    """
+    Formatea números muy grandes truncándolos de forma legible.
+    Si el número excede max_len caracteres, muestra inicio + "…" + final.
+    Evita que números gigantescos desordenen la interfaz.
+    """
     s = n_str.strip()
     if len(s) <= max_len:
         return s
@@ -182,9 +175,26 @@ def format_big(n_str: str, max_len: int = 28) -> str:
 
 
 def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: str, supuestos: list[str]):
-    # Todo dentro de un contenedor real para que el “card” cubra perfecto
+    """
+    Construye y renderiza la tarjeta de resultados.
+    
+    Esta función organiza la presentación visual de los cálculos en una tarjeta que incluye:
+    - Título y descripción del cálculo realizado
+    - Badge con el valor Z crítico obtenido
+    - Tres columnas con métricas: n redondeado, n crudo, y fórmula LaTeX
+    - Separador visual (línea horizontal)
+    - Listado de supuestos estadísticos necesarios
+    
+    Parámetros:
+      title: Texto principal de la tarjeta
+      z: Valor Z crítico calculado
+      n_crudo_str: Tamaño de muestra sin redondear (como string para precisión)
+      n_final: Tamaño de muestra redondeado hacia arriba (entero)
+      formula: Fórmula en LaTeX para renderizar
+      supuestos: Lista de supuestos estadísticos a mostrar
+    """
     with st.container(border=True):
-        # Header con flex (Z siempre arriba derecha)
+        # Encabezado: título, descripción y badge con Z crítico
         st.markdown(
             f"""
             <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
@@ -202,6 +212,10 @@ def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: s
             unsafe_allow_html=True,
         )
 
+        # Tres columnas con métricas principales
+        # Col1: n redondeado (valor principal a usar)
+        # Col2: n crudo (valor matemático exacto)
+        # Col3: Fórmula matemática
         c1, c2, c3 = st.columns(3)
         with c1:
             st.markdown(
@@ -214,21 +228,23 @@ def result_card(title: str, z: float, n_crudo_str: str, n_final: int, formula: s
                 unsafe_allow_html=True,
             )
         with c3:
-            # Tarjeta real (container) para que st.latex quede DENTRO y no se salga
             with st.container(border=True):
                 st.markdown('<div class="label">Fórmula</div>', unsafe_allow_html=True)
                 st.latex(formula)
 
-
+        # Separador visual
         st.markdown("<hr class='hr-soft'/>", unsafe_allow_html=True)
+        
+        # Sección de supuestos: lista numerada de condiciones estadísticas
         st.markdown("**Supuestos**")
         for i, s in enumerate(supuestos, start=1):
             st.write(f"{i}. {s}")
 
 
-# -----------------------------
-# Header con logo (contenedor real)
-# -----------------------------
+# ENCABEZADO DE LA APLICACIÓN
+# Carga y renderiza el logo (tiburón) junto con el título y descripción general.
+# Estructura: logo a la izquierda (16% ancho) + título a la derecha (84% ancho)
+# Esto crea una presentación profesional e identificable.
 logo = Image.open("assets/tiburon.png")
 
 col_logo, col_title = st.columns([0.16, 0.84], vertical_alignment="center")
@@ -248,8 +264,6 @@ with col_logo:
     st.image(logo, width=120)
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-
 with col_title:
     st.markdown("## 🦈 Calculadora de Tamaño de Muestra")
     st.markdown(
@@ -264,17 +278,24 @@ with col_title:
 
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
+
+# SISTEMA DE PESTAÑAS (TABS)
+# Divide la interfaz en dos secciones principales: Media y Proporción
+# Esto permite organizar lógicamente dos flujos de cálculo independientes
 tab_media, tab_prop = st.tabs(["📈 Media", "🧩 Proporción"])
 
 
-# -----------------------------
-# TAB: MEDIA
-# -----------------------------
+# PESTAÑA 1: CÁLCULO PARA MEDIA
 with tab_media:
+    # Sección de entrada de parámetros en contenedor con borde
     with st.container(border=True):
         st.markdown("### Parámetros")
         colA, colB, colC = st.columns(3)
 
+        # Tres inputs en columnas paralelas para mejor UX:
+        # - Nivel de confianza (0-1)
+        # - Desviación estándar σ o estimación piloto
+        # - Margen de error E
         with colA:
             confianza = st.number_input(
                 "Nivel de confianza (0–1)",
@@ -284,7 +305,7 @@ with tab_media:
                 step=0.0001,
                 format="%.6f",
                 key="conf_media",
-                help="Ej: 0.95 para 95% (intervalo bilateral).",
+                help="Intervalo bilateral.",
             )
 
         with colB:
@@ -295,7 +316,7 @@ with tab_media:
                 step=0.01,
                 format="%.6f",
                 key="sigma_media",
-                help="Si no conoces σ, usa una S piloto (estimación).",
+                help="Si no conoces σ, usa una estimación piloto.",
             )
 
         with colC:
@@ -306,12 +327,13 @@ with tab_media:
                 step=0.01,
                 format="%.6f",
                 key="E_media",
-                help="E en las mismas unidades que la variable.",
+                help="En las mismas unidades que la variable.",
             )
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-    # Resultados auto-actualizados
+    # Lógica de cálculo y visualización con validaciones
+    # Solo calcula si los valores son válidos (σ > 0 y E > 0)
     if sigma > 0 and margen_error > 0:
         try:
             z, n_crudo_str, n_final, supuestos = calcular_media(confianza, sigma, margen_error)
@@ -323,14 +345,18 @@ with tab_media:
         st.info("Ingresa valores válidos: σ > 0 y E > 0.")
 
 
-# -----------------------------
-# TAB: PROPORCIÓN
-# -----------------------------
+# PESTAÑA 2: CÁLCULO PARA PROPORCIÓN
 with tab_prop:
+    # Sección de entrada de parámetros en contenedor con borde
     with st.container(border=True):
         st.markdown("### Parámetros")
         colA, colB, colC, colD = st.columns([1.1, 1, 1, 1])
 
+        # Cuatro controles dispuestos horizontalmente:
+        # - Nivel de confianza
+        # - Margen de error
+        # - Toggle para usar caso conservador (p=0.5)
+        # - Input de proporción p (habilitado solo si toggle está desactivado)
         with colA:
             confianza_p = st.number_input(
                 "Nivel de confianza (0–1)",
@@ -340,7 +366,7 @@ with tab_prop:
                 step=0.0001,
                 format="%.6f",
                 key="conf_prop",
-                help="Ej: 0.95 para 95% (intervalo bilateral).",
+                help="Intervalo bilateral.",
             )
 
         with colB:
@@ -351,17 +377,19 @@ with tab_prop:
                 step=0.0001,
                 format="%.6f",
                 key="E_prop",
-                help="Ej: 0.05 equivale a 5%.",
+                help="Como proporción decimal.",
             )
 
         with colC:
             conservador = st.toggle(
                 "Usar p=0.5 (conservador)",
                 value=True,
-                help="Si no conoces p, p=0.5 maximiza p(1-p) y da n más grande.",
+                help="Si no conoces p, maximiza p(1-p) y da n más grande.",
             )
 
         with colD:
+            # Este input se deshabilita cuando conservador=True
+            # Esto guía al usuario hacia una elección clara
             p_val = st.number_input(
                 "Proporción p",
                 min_value=0.0,
@@ -376,8 +404,11 @@ with tab_prop:
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
+    # Define qué valor de p usar basado en el toggle
     p_usada = 0.5 if conservador else float(p_val)
 
+    # Lógica de cálculo y visualización con validaciones
+    # Solo calcula si los valores son válidos (E > 0 y 0 < p < 1)
     if margen_error_p > 0 and 0 < p_usada < 1:
         try:
             z, n_crudo_str, n_final, supuestos = calcular_proporcion(
@@ -391,6 +422,8 @@ with tab_prop:
         st.info("Ingresa valores válidos: E > 0 y 0 < p < 1.")
 
 
+# PIE DE PÁGINA
+# Nota informativa final con referencias técnicas
 st.markdown(
     "<div class='small-muted' style='margin-top:18px;'>Hecho con Streamlit + core.py. Si n queda gigantesco, revisa si E es demasiado pequeño para tu contexto.</div>",
     unsafe_allow_html=True,
