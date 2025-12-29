@@ -28,9 +28,9 @@ El proyecto se fundamenta en la **estadística inferencial**, específicamente e
 Para ambos casos (estimación de la media y de la proporción), se utiliza la **distribución normal estándar**.  
 El valor crítico \( Z \) se obtiene a partir del nivel de confianza mediante la expresión:
 
-\[
+$$
 Z = \Phi^{-1}\left(1 - \frac{\alpha}{2}\right)
-\]
+$$
 
 donde:
 - \( \alpha = 1 - \text{nivel de confianza} \)
@@ -69,9 +69,9 @@ El resultado del tamaño de muestra se **redondea siempre hacia arriba**, garant
 
 Para la estimación de una proporción poblacional se emplea la fórmula:
 
-\[
+$$
 n = \frac{Z^2 \cdot p(1-p)}{E^2}
-\]
+$$
 
 donde:
 - \( p \) es la proporción estimada
@@ -80,9 +80,9 @@ donde:
 
 Cuando la proporción es desconocida, se utiliza el valor:
 
-\[
+$$
 p = 0.5
-\]
+$$
 
 Este valor maximiza el término \( p(1-p) \), produciendo el **tamaño de muestra más grande posible**, lo cual constituye un enfoque **conservador**.
 
@@ -102,13 +102,13 @@ El proyecto fue desarrollado siguiendo una **arquitectura modular**, separando c
 
 La estructura general del proyecto es la siguiente:
 
-proyecto/
-├── core.py        # Lógica estadística y modelos matemáticos
-├── main.py        # Aplicación de consola (CLI)
-├── app.py         # Aplicación web con Streamlit
-├── assets/        # Recursos gráficos (logo)
-│   └── tiburon.png
-└── README.md      # Documentación
+proyecto/<br>
+├── core.py        # Lógica estadística y modelos matemáticos<br>
+├── main.py        # Aplicación de consola (CLI)<br>
+├── app.py         # Aplicación web con Streamlit<br>
+├── assets/        # Recursos gráficos (logo)<br>
+│   └── tiburon.png<br>
+└── README.md      # Documentación<br>
 
 
 
