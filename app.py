@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from PIL import Image
 from core import calcular_media, calcular_proporcion
 
@@ -339,6 +340,85 @@ with tab_media:
             z, n_crudo_str, n_final, supuestos = calcular_media(confianza, sigma, margen_error)
             result_card("Resultado — Media",z,n_crudo_str,n_final,r"n = \left(\frac{Z \cdot \sigma}{E}\right)^2",supuestos,)
 
+            st.markdown("### 📉 Sensibilidad (Media)")
+
+            col_left, col_right = st.columns(2)
+
+            # -------- Gráfica 1: n vs E --------
+            with col_left:
+                st.markdown("**n vs margen de error (E)**")
+
+                e_min = st.number_input("E mínimo", min_value=0.000001, value=0.5, step=0.000001, format="%.6f", key="e_min")
+                e_max = st.number_input("E máximo", min_value=0.000001, value=5.0, step=0.000001, format="%.6f", key="e_max")
+
+                if e_max <= e_min:
+                    st.warning("E máximo debe ser mayor que E mínimo.")
+                else:
+                    pasos = 80
+                    lista_e = [e_min + (e_max - e_min) * i / (pasos - 1) for i in range(pasos)]
+
+                    datos_e = []
+                    for e in lista_e:
+                        _, _, n_calc, _ = calcular_media(confianza, sigma, e)
+                        datos_e.append({"E": e, "n": n_calc})
+
+                    df_e = pd.DataFrame(datos_e)
+                    st.line_chart(df_e, x="E", y="n")
+                    st.caption(
+                        f"Parámetros usados: "
+                        f"σ = {sigma}, "
+                        f"nivel de confianza = {confianza}, "
+                        f"Z = {round(z, 4)}"
+                    )
+                    st.info(
+                        "📌 **Interpretación:**\n\n"
+                        "Esta gráfica muestra cómo el tamaño de muestra requerido depende del margen de error (E), "
+                        "manteniendo fijo el nivel de confianza y la desviación estándar.\n\n"
+                        "Dado que el margen de error aparece en el denominador de la fórmula, "
+                        "una reducción en E provoca un incremento cuadrático en el tamaño de muestra."
+                    )
+
+
+            # -------- Gráfica 2: n vs Confianza --------
+            with col_right:
+                st.markdown("**n vs nivel de confianza**")
+
+                conf_min = st.number_input(
+                    "Confianza mínima", min_value=0.50, max_value=0.999999, value=0.80, step=0.01, format="%.6f", key="conf_min"
+                )
+                conf_max = st.number_input(
+                    "Confianza máxima", min_value=0.50, max_value=0.999999, value=0.99, step=0.01, format="%.6f", key="conf_max"
+                )
+
+                if conf_max <= conf_min:
+                    st.warning("Confianza máxima debe ser mayor que confianza mínima.")
+                else:
+                    pasos = 80
+                    lista_conf = [conf_min + (conf_max - conf_min) * i / (pasos - 1) for i in range(pasos)]
+
+                    datos_c = []
+                    for c in lista_conf:
+                        _, _, n_calc, _ = calcular_media(c, sigma, margen_error)  # aquí E se queda fijo (el E actual)
+                        datos_c.append({"Confianza": c, "n": n_calc})
+
+                    df_c = pd.DataFrame(datos_c)
+                    st.line_chart(df_c, x="Confianza", y="n")
+                    st.caption(
+                        f"Parámetros usados: "
+                        f"E = {margen_error}, "
+                        f"σ = {sigma}"
+                    )
+
+                    st.info(
+                        "📌 **Interpretación:**\n\n"
+                        "Esta gráfica muestra cómo el tamaño de muestra requerido aumenta al exigir un mayor nivel de confianza, "
+                        "manteniendo fijo el margen de error y la desviación estándar.\n\n"
+                        "El crecimiento se debe a que el valor crítico Z aumenta rápidamente "
+                        "a niveles de confianza altos."
+                    )
+
+
+
         except Exception as e:
             st.error(f"No se pudo calcular: {e}")
     else:
@@ -423,8 +503,10 @@ with tab_prop:
 
 
 # PIE DE PÁGINA
-# Nota informativa final con referencias técnicas
 st.markdown(
-    "<div class='small-muted' style='margin-top:18px;'>Hecho con Streamlit + core.py. Si n queda gigantesco, revisa si E es demasiado pequeño para tu contexto.</div>",
+    "<div class='small-muted' style='margin-top:18px;'>"
+    "Autores: Luis Enrique Cruz Estrella y Ángel Sánchez Rangel. "
+    "© ESCOM IPN."
+    "</div>",
     unsafe_allow_html=True,
 )
