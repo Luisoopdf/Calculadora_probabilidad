@@ -44,9 +44,11 @@ Este procedimiento permite calcular el valor Z de forma precisa, sin necesidad d
 
 Para estimar una media poblacional, el tamaño de muestra se calcula con la siguiente fórmula:
 
+
 \[
 n = \left(\frac{Z \cdot \sigma}{E}\right)^2
 \]
+
 
 donde:
 - \( Z \) es el valor crítico asociado al nivel de confianza
@@ -101,13 +103,14 @@ El proyecto fue desarrollado siguiendo una **arquitectura modular**, separando c
 
 La estructura general del proyecto es la siguiente:
 
-/proyecto
-│
-├── core.py # Lógica estadística y modelos matemáticos
-├── main.py # Aplicación de consola (CLI)
-├── app.py # Aplicación web con Streamlit
-├── assets/ # Recursos gráficos (logo)
-└── README.md # Documentación
+proyecto/
+├── core.py        # Lógica estadística y modelos matemáticos
+├── main.py        # Aplicación de consola (CLI)
+├── app.py         # Aplicación web con Streamlit
+├── assets/        # Recursos gráficos (logo)
+│   └── tiburon.png
+└── README.md      # Documentación
+
 
 
 ---
