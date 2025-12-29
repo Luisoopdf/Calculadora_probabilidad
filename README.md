@@ -44,10 +44,9 @@ Este procedimiento permite calcular el valor Z de forma precisa, sin necesidad d
 
 Para estimar una media poblacional, el tamaño de muestra se calcula con la siguiente fórmula:
 
-
-\[
+$$
 n = \left(\frac{Z \cdot \sigma}{E}\right)^2
-\]
+$$
 
 
 donde:
