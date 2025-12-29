@@ -33,8 +33,9 @@ Z = \Phi^{-1}\left(1 - \frac{\alpha}{2}\right)
 $$
 
 donde:
-- \( \alpha = 1 - \text{nivel de confianza} \)
-- \( \Phi^{-1} \) representa la función inversa de la distribución normal acumulada
+
+- $ \alpha = 1 - \text{nivel de confianza} $
+- $ \Phi^{-1} $ representa la función inversa de la distribución normal acumulada
 
 Este procedimiento permite calcular el valor Z de forma precisa, sin necesidad de utilizar tablas estadísticas.
 
@@ -50,15 +51,17 @@ $$
 
 
 donde:
-- \( Z \) es el valor crítico asociado al nivel de confianza
-- \( \sigma \) es la desviación estándar poblacional o una estimación piloto
-- \( E \) es el margen de error máximo permitido
+donde:
+
+- Z es el valor crítico asociado al nivel de confianza  
+- σ es la desviación estándar poblacional o una estimación piloto  
+- E es el margen de error máximo permitido  
 
 **Supuestos estadísticos:**
-- El muestreo es aleatorio y representativo de la población
-- Las observaciones son independientes
-- Si \( n \ge 30 \), se justifica la aproximación normal por el Teorema Central del Límite
-- Si \( n < 30 \), se asume que la variable sigue una distribución aproximadamente normal
+- El muestreo es aleatorio y representativo de la población  
+- Las observaciones son independientes  
+- Si n ≥ 30, se justifica la aproximación normal por el Teorema Central del Límite  
+- Si n < 30, se asume que la variable sigue una distribución aproximadamente normal  
 - El margen de error se expresa en las mismas unidades que la variable medida
 
 El resultado del tamaño de muestra se **redondea siempre hacia arriba**, garantizando que el margen de error se cumpla.
@@ -74,9 +77,10 @@ n = \frac{Z^2 \cdot p(1-p)}{E^2}
 $$
 
 donde:
-- \( p \) es la proporción estimada
-- \( E \) es el margen de error
-- \( Z \) es el valor crítico
+
+- p es la proporción estimada  
+- E es el margen de error  
+- Z es el valor crítico asociado al nivel de confianza  
 
 Cuando la proporción es desconocida, se utiliza el valor:
 
@@ -87,8 +91,8 @@ $$
 Este valor maximiza el término \( p(1-p) \), produciendo el **tamaño de muestra más grande posible**, lo cual constituye un enfoque **conservador**.
 
 **Condición para la aproximación normal en proporciones:**
-- \( np \ge 5 \)
-- \( n(1-p) \ge 5 \)
+- n · p ≥ 5  
+- n · (1 − p) ≥ 5 
 
 Estas condiciones son verificadas y explicadas en los resultados del programa.
 
