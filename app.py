@@ -736,8 +736,9 @@ with tab_prop:
 # Pie con autores y créditos
 st.markdown(
     "<div class='small-muted' style='margin-top:18px;'>"
-    "Luis Enrique Cruz Estrella | Ángel Sánchez Rangel "
+    "Luis Enrique Cruz Estrella | Ángel Sánchez Rangel | Raul Contreras Martinez"
     "© ESCOM IPN."
     "</div>",
     unsafe_allow_html=True,
 )
+
